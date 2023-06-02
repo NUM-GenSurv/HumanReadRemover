@@ -25,7 +25,7 @@ git clone https://github.com/NUM-GenSurv/HumanReadRemover.git
 
 ```
 cd HumanReadRemover
-wget GRCh38_full_analysis_set_plus_decoy_hla_and_SARS-CoV-2.fa.gz
+wget wget -O GRCh38_full_analysis_set_plus_decoy_hla_and_SARS-CoV-2.fa.gz https://osf.io/gtbre/download 
 gunzip GRCh38_full_analysis_set_plus_decoy_hla_and_SARS-CoV-2.fa.gz
 md5sum GRCh38_full_analysis_set_plus_decoy_hla_and_SARS-CoV-2.fa # check that output is equal to 774032a66a7ac8db71f89b9f0c426b7f
 ```
