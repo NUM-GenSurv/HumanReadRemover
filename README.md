@@ -1,12 +1,12 @@
 # HumanReadRemover
-If you want to submit your raw SARS-CoV-2 sequencing reads to public data repositories (e.g. to the NUM data hub [COGDatm](https://cogdat.dat)), you can use this small script to identify and filter out reads of potentially human origin.
+If you want to submit your raw SARS-CoV-2 sequencing reads to public data repositories (e.g. to the NUM data hub [COGDat](https://cogdat.dat)), you can use this small script to identify and filter out reads of potentially human origin.
 
 ## Usage
 Both Nanopore and paired-end Illumina data are supported. The data input type is determined automatically based on the supplied input arguments (`--inputFASTQ` for Nanopore data, `--inputFASTQ_R1` and `--inputFASTQ_R2` for paired-end Illumina data).
 
 Only reads that
 - generate no alignments to the human genome
-- at least one alignment to the SARS-CoV-2 genome (but see below); for paired-end reads, one member read aligning to the SARS-CoV-2 genome is sufficient to satisfy this criterion
+- at least one alignment to the SARS-CoV-2 genome (but see below; for paired-end reads, one member read aligning to the SARS-CoV-2 genome is sufficient to satisfy this criterion)
 
 are written to the output FASTQ files (`--outputFASTQ` for Nanopore data, `--outputFASTQ_R1` and `--outputFASTQ_R2` for paired-end Illumina data)
 
