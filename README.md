@@ -6,9 +6,12 @@ Both Nanopore and paired-end Illumina data are supported. The data input type is
 
 Only reads that
 - generate no alignments to the human genome
-- at least one alignment to the SARS-CoV-2 genome
+- at least one alignment to the SARS-CoV-2 genome (but see below); for paired-end reads, one member read aligning to the SARS-CoV-2 genome is sufficient to satisfy this criterion
 
 are written to the output FASTQ files (`--outputFASTQ` for Nanopore data, `--outputFASTQ_R1` and `--outputFASTQ_R2` for paired-end Illumina data)
+
+### Outputting reads that do not generate alignments to the SARS-CoV-2 genome
+If you want to output reads that do not align to the SARS-CoV-2 genome (i.e. if you only want to filter out reads aligning to the human genome), you can specify the parameter `--requireAlignment2SARSCov2 0`.
 
 ### Nanopore data
 `perl filterHumanGenome.pl --inputFASTQ /path/to/input.fastq --outputFASTQ /path/to/output.fastq`

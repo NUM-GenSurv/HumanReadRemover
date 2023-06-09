@@ -19,6 +19,7 @@ my $samtools_bin;
 my $minimap2_bin;
 my $GRCh38_plus_SARSCoV2_fasta;
 my $threads = 4;
+my $requireAlignment2SARSCov2 = 1;
 GetOptions (
 	'inputFASTQ:s' => \$inputFASTQ,
 	'inputFASTQ_R1:s' => \$inputFASTQ_R1,
@@ -30,6 +31,7 @@ GetOptions (
 	'minimap2_bin:s' => \$minimap2_bin, 
 	'GRCh38_plus_SARSCoV2_fasta:s' => \$GRCh38_plus_SARSCoV2_fasta, 	
 	'threads:s' => \$threads, 	
+	'requireAlignment2SARSCov2:s' => \$requireAlignment2SARSCov2,	
 );
 
 die "Please provide either --inputFASTQ (for Nanopore data) or --inputFASTQ_R1 and --inputFASTQ_R2 (for Illumina data)" unless($inputFASTQ xor ($inputFASTQ_R1 or $inputFASTQ_R2));
@@ -73,6 +75,7 @@ unless((-e $samtools_bin) and (-x $samtools_bin))
 print STDERR "filterHumanGenome.pl:\n";
 print STDERR "\t", "samtools path: $samtools_bin\n";
 print STDERR "\t", "minimap2 path: $minimap2_bin\n";
+print STDERR "\t", "requireAlignment2SARSCov2: $requireAlignment2SARSCov2\n";
 print STDERR "\n";
 
 
@@ -112,6 +115,7 @@ close(MINIMAP2);
 my $reads_removed_potentiallyHuman = 0;
 my $reads_removed_notAlignedToViralGenome = 0;
 my $reads_notRemoved = 0;
+my $bases_notRemoved_notAlignedToViralGenome = 0;
 my $bases_removed_potentiallyHuman = 0;
 my $bases_removed_notAlignedToViralGenome = 0;
 my $bases_notRemoved = 0;
@@ -150,11 +154,15 @@ foreach my $filterReadTuple (@filterReadTuples)
 			}
 			else
 			{
-				if($reads_viral{$readID})
+				if($reads_viral{$readID} or (not $requireAlignment2SARSCov2))
 				{
 					$reads_notRemoved++;
 					$bases_notRemoved += length($read_sequence);
 					print FASTQOUT $readID_line, "\n", $read_sequence, $plus, $read_qualities;
+					if(not $reads_viral{$readID})
+					{
+						$bases_notRemoved_notAlignedToViralGenome++;
+					}					
 				}
 				else
 				{
@@ -167,9 +175,18 @@ foreach my $filterReadTuple (@filterReadTuples)
 	close(FASTQIN);
 	close(FASTQOUT);
 }
-print STDERR "Done. $reads_notRemoved remaining reads ($reads_removed_potentiallyHuman removed as potentially human, $reads_removed_notAlignedToViralGenome removed as not aligning to viral genome)\n";
 
-print join("\t", $reads_removed_potentiallyHuman, $reads_removed_notAlignedToViralGenome, $reads_notRemoved, $bases_removed_potentiallyHuman, $bases_removed_notAlignedToViralGenome, $bases_notRemoved), "\n";
+if($requireAlignment2SARSCov2)
+{
+	print STDERR "Done. $reads_notRemoved remaining reads ($reads_removed_potentiallyHuman removed as potentially human, $reads_removed_notAlignedToViralGenome removed as not aligning to viral genome. If you do not want to remove reads not aligning to the viral genome, add argument '--requireAlignment2SARSCov2 0')\n";
+}
+else
+{
+	print STDERR "Done. $reads_notRemoved remaining reads ($reads_removed_potentiallyHuman removed as potentially human). $bases_notRemoved_notAlignedToViralGenome reads were not removed despite not generating an alignment to the viral genome.\n";
+
+}
+
+print join("\t", $reads_removed_potentiallyHuman, $reads_removed_notAlignedToViralGenome, $reads_notRemoved, $bases_notRemoved_notAlignedToViralGenome, $bases_removed_potentiallyHuman, $bases_removed_notAlignedToViralGenome, $bases_notRemoved), "\n";
 
 sub find_path
 {
